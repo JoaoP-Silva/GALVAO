@@ -31,15 +31,24 @@ df = pd.DataFrame({
     'src': src,
 })
 
-# Ler o arquivo JSON existente
-with open('data/data.json', 'r', encoding='utf-8') as json_file:
-    dados_json_existente = json.load(json_file)
+# Divide os novos dados
+num_rows = len(df)
+train_rows = int(0.8 * num_rows)
+dev_rows = int(0.1 * num_rows)
 
-# Adicionar os dados do DataFrame ao final do JSON existente
-dados_json_existente.extend(df.to_dict(orient='records'))
 
-# Salvar o arquivo JSON atualizado
-with open('data/data.json', 'w', encoding='utf-8') as json_file:
-    json.dump(dados_json_existente, json_file, ensure_ascii=False, indent=2)
+# Carrega os dados existentes
+existing_train_data = pd.read_json('data/train.json')
+existing_dev_data = pd.read_json('data/dev.json')
+existing_test_data = pd.read_json('data/test.json')
 
-print("Dados adicionados ao arquivo data.json.")
+
+# Adiciona os dados aos existentes
+existing_train_data = existing_train_data.append(df[:train_rows], ignore_index=True)
+existing_dev_data = existing_dev_data.append(df[train_rows:train_rows+dev_rows], ignore_index=True)
+existing_test_data = existing_test_data.append(df[train_rows+dev_rows:], ignore_index=True)
+
+# Salva os dados atualizados
+existing_train_data.to_json('data/train.json', orient='records')
+existing_dev_data.to_json('data/dev.json', orient='records')
+existing_test_data.to_json('data/test.json', orient='records')

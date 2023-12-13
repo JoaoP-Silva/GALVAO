@@ -1,16 +1,21 @@
 import os
 import json
+import random
 
 count = 0
 
 # Caminho para o diretório principal
 diretorio_principal = "data/transcriptions"
 
-# Nome do arquivo JSON de saída
-arquivo_json_saida = "data/data.json"
+# Nome dos arquivos JSON de saída
+TRAIN_PATH = 'data/train.json'
+DEV_PATH   = 'data/dev.json'  
+TEST_PATH  = 'data/test.json' 
 
-# Inicializa a lista que conterá os dados do JSON
-dados_json = []
+# Inicializa as listas que conterão os dados dos JSONs
+dados_json_train = []
+dados_json_dev = []
+dados_json_test = []
 
 # Itera sobre os diretórios dentro do diretório principal
 for diretorio_Xi in os.listdir(diretorio_principal):
@@ -32,16 +37,38 @@ for diretorio_Xi in os.listdir(diretorio_principal):
                             count += 1
                             # Remove o prefixo "Transcript: " e adiciona à lista de dados
                             caption = linha[len("Transcript: "):].strip()
-                            dados_json.append({
-                                'caption': caption,
-                                'highlight': 0,
-                                'src': arquivo_txt
-                            })
 
-print(f"O numero de transcricoes processadas foi de", count)
+                            # Determina em qual conjunto colocar os dados
+                            random_number = random.uniform(0, 1)
+                            if random_number < 0.8:
+                                dados_json_train.append({
+                                    'caption': caption,
+                                    'highlight': 0,
+                                    'src': arquivo_txt
+                                })
+                            elif random_number < 0.9:
+                                dados_json_dev.append({
+                                    'caption': caption,
+                                    'highlight': 0,
+                                    'src': arquivo_txt
+                                })
+                            else:
+                                dados_json_test.append({
+                                    'caption': caption,
+                                    'highlight': 0,
+                                    'src': arquivo_txt
+                                })
 
-# Salva os dados no arquivo JSON
-with open(arquivo_json_saida, 'w', encoding='utf-8') as json_file:
-    json.dump(dados_json, json_file, ensure_ascii=False, indent=2)
+print(f"O número de transcrições processadas foi de", count)
 
-print("Processo concluído. Dados salvos em", arquivo_json_saida)
+# Salva os dados nos arquivos JSON
+with open(TRAIN_PATH, 'w', encoding='utf-8') as json_file:
+    json.dump(dados_json_train, json_file, ensure_ascii=False, indent=2)
+
+with open(DEV_PATH, 'w', encoding='utf-8') as json_file:
+    json.dump(dados_json_dev, json_file, ensure_ascii=False, indent=2)
+
+with open(TEST_PATH, 'w', encoding='utf-8') as json_file:
+    json.dump(dados_json_test, json_file, ensure_ascii=False, indent=2)
+
+print("Processo concluído. Dados salvos em", TRAIN_PATH, DEV_PATH, TEST_PATH)
